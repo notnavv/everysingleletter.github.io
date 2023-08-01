@@ -1,32 +1,253 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Da best website ever</title>
-	<link rel="stylesheet" type="text/css" href="style.css">
+    <title>The Button Game</title>
+    <style>
+        body {
+            background-color: #333; /* Optional background color for the body */
+            margin: 0;
+        }
 
+        #button {
+            position: absolute;
+            width: 200px;
+            height: 80px;
+            background: linear-gradient(135deg, rgba(144, 0, 255, 0.534), rgba(132, 29, 130, 0.368));
+            backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+            box-shadow: 6px 6px 12px rgba(0, 0, 0, 0.2); /* Add a 3D-like box shadow */
+            border-radius: 15px;
+            color: #ffffff;
+            text-align: center;
+            font-size: 40px;
+            line-height: 40px;
+            font-family: 'Courier New', Courier, monospace;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1;
+            top: 50%; /* Center the button vertically */
+            left: 50%; /* Center the button horizontally */
+            transform: translate(-50%, -50%); /* Center the button precisely */
+            user-select: none;
+        }
+
+        #counter {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            font-size: 600px; /* You can adjust the font size as desired */
+            color: transparent; /* Set text color transparent */
+            -webkit-background-clip: text; /* Use background-clip to apply gradient to text */
+            background-clip: text;
+            background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.751), rgba(255, 255, 255, 0.089));
+            opacity: 0.3; /* Opacity (0.0 to 1.0) - lower value makes it more transparent */
+            transform: translate(-50%, -50%);
+            z-index: 0; /* Set a higher z-index to keep the number above the button */
+            user-select: none;
+        }
+
+        #result-box {
+            position: fixed;
+            bottom: -100px; /* Start the box below the screen */
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
+            backdrop-filter: blur(10px);
+             -webkit-backdrop-filter: blur(10px);
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            border-radius: 5px;
+            font-size: 40px;
+            font-stretch: extra-condensed;
+            font-family:'Courier New', Courier, monospace;
+            color: #ffffff;
+            z-index: 2; /* Set a higher z-index to bring the box above the button and counter */
+            display: none; /* Hide the box by default */
+            transition: bottom 0.5s ease; /* Add a smooth transition animation */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+        }
+
+        #retry-button {
+            background: linear-gradient(to right, #b86bff, #ac4688);
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 24px;
+            cursor: pointer;
+            margin-top: 20px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+    </style>
 </head>
 <body>
-	<div class="headings">
-		<h1>lol  </h1>
-		<h2>lol  </h2>
-		<h3>lol  </h3>
-		<h4>lol  </h4>
-		<h5>lol  </h5>
-		<h1>YEET </h6>
-		<p>qwertyuioplkjhgfdsazxcvbnm</p>
-	</div>
-	<ol>
+    <div id="button" onclick="popButton()">Button</div>
+    <div id="counter">0</div>
+    <div id="result-box"></div> <!-- New box to display the result -->
 
-		<marquee><a href="page.html"><img src="https://cdn.pixabay.com/photo/2013/07/13/10/18/ghost-156969_960_720.png"/></a></marquee>
-		<li><h2>Look at da link below</h2></li>
-		<li><h2>Also the other page called da best #2 website ever</h2></li>
-	</ol>
-	<a href="https://www.coolmath-games.com/0-run-3">Link</a>
-	<!--this is a comment -->
-	<a href="page.html">Page</a> <!-- external link -->
-	<!-- w3scools.com -->
-	<img src="https://s3.amazonaws.com/gs-geo-images/f5a980d7-4d95-428e-8387-36b00e0b271e.png"/>
-	<img src="https://www.donutbar.com/wp-content/uploads/2017/05/donut-bar-homers.png">
-	<p><a id="buttonClick" href="page.html">Click Here</a></p>
+    <script>
+        let clickCount = 0;
+        let resultBoxVisible = false; // Add a flag to track if the result box is visible
+        let retryButtonClicked = false; // Add a flag to track if the "Retry" button was clicked
+        let shouldResetCounter = false;
+
+        function updateClickCounter() {
+            const counterElement = document.getElementById('counter');
+            counterElement.textContent = clickCount;
+        }
+
+        let buttonVisible = true; // Add a flag to track the button visibility
+
+        function showResultBox() {
+            const resultBox = document.getElementById('result-box');
+            resultBox.textContent = `You missed the button ${clickCount} times...`;
+            resultBox.style.display = 'block';
+
+            // Slide the result box from the bottom to the center
+            resultBox.style.bottom = '50%';
+            resultBox.style.transform = 'translate(-50%, 50%)';
+
+            // Create a container element to hold both the result text and the retry button
+            const resultContainer = document.createElement('div');
+            resultContainer.style.display = 'flex';
+            resultContainer.style.flexDirection = 'column';
+            resultContainer.style.alignItems = 'center';
+
+            resultBoxVisible = true;
+
+            // Create the retry button and append it to the container
+            const retryButton = document.createElement('button');
+            retryButton.id = 'retry-button';
+            retryButton.textContent = 'Retry';
+            retryButton.onclick = retryGame; // Call retryGame() when the button is clicked
+            resultContainer.appendChild(retryButton);
+
+            // Append the container to the result box
+            resultBox.appendChild(resultContainer);
+        }
+
+        function retryGame() {
+            // The retryGame() function has been modified
+            retryButtonClicked = true;
+
+            // Reset the click count and update the counter (if the "Retry" button wasn't clicked)
+            if (retryButtonClicked) {
+                clickCount = 0;
+                updateClickCounter();
+            }
+
+            // Hide the retry button
+            const retryButton = document.getElementById('retry-button');
+            retryButton.style.display = 'none';
+
+            // Reset the moving button completely
+            resetMovingButton();
+
+            // Hide the result box by moving it off the screen
+            const resultBox = document.getElementById('result-box');
+            resultBox.style.bottom = '-100%'; // Set a negative value to move it off the screen
+
+            // Reset the resultBoxVisible and retryButtonClicked flags
+            resultBoxVisible = false;
+            retryButtonClicked = false;
+
+            // Show the moving button again after a short delay (if it was visible before)
+            if (buttonVisible) {
+                const button = document.getElementById('button');
+                setTimeout(() => {
+                    button.style.display = 'block';
+                }, 500);
+            }
+
+            // Reset the shouldResetCounter flag
+            shouldResetCounter = false;
+        }
+
+        function resetMovingButton() {
+            // Reset the position of the moving button to the center
+            const button = document.getElementById('button');
+            button.style.left = '50%';
+            button.style.top = '50%';
+            button.style.transform = 'translate(-50%, -50%)';
+            button.style.display = 'block'; // Display the button again
+            buttonVisible = true; // Reset the flag to track the button visibility
+
+            // Realign the text on the button
+            button.style.lineHeight = button.clientHeight + 'px';
+            button.style.textAlign = 'center';
+        }
+
+        function hideButton() {
+            const button = document.getElementById('button');
+            button.style.display = 'none';
+            buttonVisible = false; // Set the flag to track the button visibility
+        }
+
+        // Attach the hideButton function to the click event of the moving button
+        const movingButton = document.getElementById('button');
+        movingButton.addEventListener('click', hideButton);
+
+        function getRandomPosition() {
+            const button = document.getElementById('button');
+            const windowWidth = window.innerWidth - button.clientWidth;
+            const windowHeight = window.innerHeight - button.clientHeight;
+            const randomX = Math.floor(Math.random() * windowWidth);
+            const randomY = Math.floor(Math.random() * windowHeight);
+            return { x: randomX, y: randomY };
+        }
+
+        function updateButtonPosition(event) {
+            const button = document.getElementById('button');
+            const mouseX = event.clientX;
+            const mouseY = event.clientY;
+            const buttonRect = button.getBoundingClientRect();
+
+            const buttonCenterX = buttonRect.left + buttonRect.width / 2;
+            const buttonCenterY = buttonRect.top + buttonRect.height / 2;
+            const distance = Math.sqrt(Math.pow(mouseX - buttonCenterX, 2) + Math.pow(mouseY - buttonCenterY, 2));
+
+            const maxDistance = 100;
+
+            if (distance <= maxDistance) {
+                const newPosition = getRandomPosition();
+                button.style.left = newPosition.x + 'px';
+                button.style.top = newPosition.y + 'px';
+            }
+        }
+
+        function popButton() {
+            // If the button is clicked, reset the counter to zero and update it
+            updateClickCounter();
+
+            const button = document.getElementById('button');
+            button.style.transform = 'scale(0)';
+            setTimeout(() => {
+                button.style.transform = 'scale(1)';
+            }, 1000);
+
+            // Call showResultBox() to display the result box
+            showResultBox();
+        }
+
+        document.addEventListener('mousemove', updateButtonPosition);
+
+        document.addEventListener('click', function (event) {
+            const button = document.getElementById('button');
+            // Only count the clicks if the result box is not visible
+            if (!resultBoxVisible && event.target !== button) {
+                clickCount++;
+                updateClickCounter();
+            }
+        });
+    </script>
 </body>
 </html>
